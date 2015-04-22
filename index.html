@@ -75,7 +75,6 @@ requestAnimationFrame(function rAFloop(){
     };
 
     Row.prototype.update = function ( db ) {
-
       if ( db.name !== this.name ) {
         this.dom.name.textContent = this.name = db.name;
       }
@@ -107,8 +106,6 @@ requestAnimationFrame(function rAFloop(){
           cell.dom.popoverContent.textContent = cell.query = query.query;
         }
       }
-
-      this.db = db;
     };
 
     var tbody = document.querySelector( 'tbody' );
@@ -117,7 +114,6 @@ requestAnimationFrame(function rAFloop(){
       var row = new Row();
 
       row.update( db );
-
       tbody.appendChild( row.dom.el );
 
       return row;
