@@ -9,7 +9,7 @@ His [vanilla DOM implementation](http://webreflection.github.io/dbmonster/) is a
 But what would the fastest possible vanilla DOM implementation look like?
 
 
-## Something like [this](http://rich-harris.co.uk/dom-monster), presumably
+## Something like [this](http://www.rich-harris.co.uk/dom-monster), presumably
 
 dom-monster is a fork of the Ractive implementation, without Ractive. It's *really bad code*, with lots of hardcoded assumptions (e.g. about the number of rows staying constant), and anyone who produced code like this would receive some stern words if they were working on the same team as me. But because the code doesn't make any attempt to be non-brittle, it's pretty fast.
 
