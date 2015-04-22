@@ -4,7 +4,7 @@ The dbmonster benchmark has been [widely used](https://github.com/Rich-Harris/ra
 
 Personally, I wouldn't want to build an app without a suitable abstraction (*cough* [Ractive](http://ractivejs.org) *cough*), because your code becomes hellaciously complex surprisingly quickly if you try to rely on vanilla DOM. But Andrea makes a reasonable point that a vanilla DOM implementation serves as a useful benchmark against which to evaluate frameworks.
 
-His [vanilla DOM implementation](http://webreflection.github.io/dbmonster/) is actually *slower* than the [Ractive implementation](http://www.rich-harris.co.uk/ractive-dbmonster/), at least on Chrome on the machine I'm writing this on. That's because Ractive implements various optimisations that no sane developer would bother with themselves. (Yep, abstractions *can* be faster than the thing they're abstracting, when the underlying primitives are sufficiently complex that we don't use them correctly.)
+On Chrome on the machine I'm writing this on, his [vanilla DOM implementation](http://webreflection.github.io/dbmonster/) is actually *slower* than the [Ractive implementation](http://www.rich-harris.co.uk/ractive-dbmonster/) (though that's not true on every device or every browser). That's because Ractive implements various optimisations that no sane developer would bother with themselves. (Yep, abstractions *can* be faster than the thing they're abstracting, when the underlying primitives are sufficiently complex that we don't use them correctly.)
 
 But what would the fastest possible vanilla DOM implementation look like?
 
