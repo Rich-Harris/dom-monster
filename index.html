@@ -13,119 +13,115 @@
 
 <div id="body">
   <table class="table table-striped latest-data">
-    <tbody></tbody>
+	<tbody></tbody>
   </table>
 </div>
 
-<script src="underscore-min.js"></script>
-<script src="junkola-copied-from-ember.js"></script>
-
-<script src="https://cdn.rawgit.com/paulirish/memory-stats.js/master/memory-stats.js"></script>
-<script>
-var stats = new MemoryStats();
-stats.domElement.style.position = 'fixed';
-stats.domElement.style.right        = '0px';
-stats.domElement.style.bottom       = '0px';
-document.body.appendChild( stats.domElement );
-requestAnimationFrame(function rAFloop(){
-    stats.update();
-    requestAnimationFrame(rAFloop);
-});
-</script>
+<script src="ENV.js"></script>
+<script src="http://localvoid.github.io/perf-monitor/0.1/perf-monitor.js"></script>
 
 <script type="text/javascript">
   var ROWS = 100;
   var TIMEOUT = 0;
 
+  perfMonitor.startFPSMonitor();
+  perfMonitor.startMemMonitor();
+  perfMonitor.initProfiler('view update');
+
   (function () {
-    function Row ( db ) {
-      this.dom = {};
-      this.dom.el = document.createElement( 'tr' );
+	function Row ( db ) {
+	  this.dom = {};
+	  this.dom.el = document.createElement( 'tr' );
 
-      this.dom.name = this.dom.el.appendChild( document.createElement( 'td' ) );
-      this.dom.name.className = 'dbname';
+	  this.dom.name = this.dom.el.appendChild( document.createElement( 'td' ) );
+	  this.dom.name.className = 'dbname';
 
-      this.dom.count = this.dom.el.appendChild( document.createElement( 'td' ) );
-      this.dom.count.className = 'query-count';
+	  this.dom.count = this.dom.el.appendChild( document.createElement( 'td' ) );
+	  this.dom.count.className = 'query-count';
 
-      this.dom.countSpan = this.dom.count.appendChild( document.createElement( 'span' ) );
+	  this.dom.countSpan = this.dom.count.appendChild( document.createElement( 'span' ) );
 
-      this.cells = [];
-      var cell;
-      for ( var i = 0; i < 5; i += 1 ) {
-        cell = {
-          dom: {
-            el: this.dom.el.appendChild( document.createElement( 'td' ) )
-          }
-        };
+	  this.cells = [];
+	  var cell;
+	  for ( var i = 0; i < 5; i += 1 ) {
+		cell = {
+		  dom: {
+			el: this.dom.el.appendChild( document.createElement( 'td' ) )
+		  }
+		};
 
-        cell.dom.elapsed = cell.dom.el.appendChild( document.createTextNode( '' ) );
+		cell.dom.elapsed = cell.dom.el.appendChild( document.createTextNode( '' ) );
 
-        cell.dom.popover = cell.dom.el.appendChild( document.createElement( 'div' ) );
-        cell.dom.popover.className = 'popover left';
+		cell.dom.popover = cell.dom.el.appendChild( document.createElement( 'div' ) );
+		cell.dom.popover.className = 'popover left';
 
-        cell.dom.popoverContent = cell.dom.popover.appendChild( document.createElement( 'div' ) );
-        cell.dom.popoverContent.className = 'popover-content';
+		cell.dom.popoverContent = cell.dom.popover.appendChild( document.createElement( 'div' ) );
+		cell.dom.popoverContent.className = 'popover-content';
 
-        cell.dom.popoverArrow = cell.dom.popover.appendChild( document.createElement( 'div' ) );
-        cell.dom.popoverArrow.className = 'arrow';
+		cell.dom.popoverArrow = cell.dom.popover.appendChild( document.createElement( 'div' ) );
+		cell.dom.popoverArrow.className = 'arrow';
 
-        this.cells.push( cell );
-      }
-    };
+		this.cells.push( cell );
+	  }
+	};
 
-    Row.prototype.update = function ( db ) {
-      if ( db.name !== this.name ) {
-        this.dom.name.textContent = this.name = db.name;
-      }
+	Row.prototype.update = function ( db ) {
+		var lastSample = db.lastSample;
 
-      if ( db.countClassName !== this.countClassName ) {
-        this.dom.countSpan.className = this.countClassName = db.countClassName;
-      }
+		if ( db.dbname !== this.dbname ) {
+			this.dom.name.textContent = this.dbname = db.dbname;
+		}
 
-      if ( db.queries.length !== this.numQueries ) {
-        this.dom.countSpan.textContent = this.numQueries = db.queries.length;
-      }
+		if ( lastSample.countClassName !== this.countClassName ) {
+			this.dom.countSpan.className = this.countClassName = lastSample.countClassName;
+		}
 
-      var cells = this.cells;
-      var cell, query;
+		if ( lastSample.nbQueries !== this.nbQueries ) {
+			this.dom.countSpan.textContent = this.nbQueries = lastSample.nbQueries;
+		}
 
-      for ( var i = 0; i < 5; i += 1 ) {
-        cell = cells[i];
-        query = db.topFiveQueries[i];
+		var cells = this.cells;
+		var cell, query;
 
-        if ( query.className !== cell.className ) {
-          cell.dom.el.className = cell.className = 'Query ' + query.className;
-        }
+		for ( var i = 0; i < 5; i += 1 ) {
+			cell = cells[i];
+			query = lastSample.topFiveQueries[i];
 
-        if ( query.elapsed !== cell.elapsed ) {
-          cell.dom.elapsed.data = cell.elapsed = query.elapsed;
-        }
+			if ( query.elapsedClassName !== cell.className ) {
+				cell.dom.el.className = cell.className = query.elapsedClassName;
+			}
 
-        if ( query.query !== cell.query ) {
-          cell.dom.popoverContent.textContent = cell.query = query.query;
-        }
-      }
-    };
+			if ( query.formatElapsed !== cell.elapsed ) {
+				cell.dom.elapsed.data = cell.elapsed = query.formatElapsed;
+			}
 
-    var tbody = document.querySelector( 'tbody' );
+			if ( query.query !== cell.query ) {
+				cell.dom.popoverContent.textContent = cell.query = query.query;
+			}
+		}
+	};
 
-    var rows = getDatabases().map( function ( db ) {
-      var row = new Row();
+	var tbody = document.querySelector( 'tbody' );
 
-      row.update( db );
-      tbody.appendChild( row.dom.el );
+	var rows = ENV.generateData().toArray().map( function ( db ) {
+	  var row = new Row();
 
-      return row;
-    });
+	  row.update( db );
+	  tbody.appendChild( row.dom.el );
 
-    function redraw() {
-      getDatabases().forEach( function ( db, i ) {
-        rows[i].update( db );
-      });
-      setTimeout(redraw, TIMEOUT);
-    }
-    redraw();
+	  return row;
+	});
+
+	function redraw() {
+		var dbs = ENV.generateData().toArray();
+		perfMonitor.startProfile('view update');
+		dbs.forEach( function ( db, i ) {
+			rows[i].update( db );
+		});
+		perfMonitor.endProfile('view update');
+		setTimeout(redraw, ENV.timeout);
+	}
+	redraw();
   }());
 </script>
 
